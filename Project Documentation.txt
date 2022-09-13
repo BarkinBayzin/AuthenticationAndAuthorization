@@ -1,0 +1,118 @@
+﻿
+1. Asp Net Core Web App (Model - View - Component) projesi açýlýr.
+2. Models => Entities klasörü açýlýr.
+	2.1. Models => Entities => Interfaces klasörü açýlýr.
+		2.1.1. Models => Entities => Interfaces => IBaseEntity.cs açýlýsýn.
+
+	    	public enum Status { Active = 1, Modified = 2, Passive = 3 }
+
+            public interface IBaseEntity
+            {
+                public DateTime CreateDate { get; set; }
+                public DateTime? UpdateDate { get; set; }
+                public DateTime? DeleteDate { get; set; }
+                public Status Status { get; set; }
+            }
+
+	2.2. Models => Entities => Concrete klasörü açýlýr.
+		2.2.1. Models => Entities => Concrete => AppUser.cs açýlýr.
+
+            public class AppUser : IdentityUser, IBaseEntity 
+            {
+                public string Occupation { get; set; }
+
+                private DateTime _createDate = DateTime.Now;
+                public DateTime CreateDate { get => _createDate; set => _createDate = value; }
+                public DateTime? UpdateDate { get; set; }
+                public DateTime? DeleteDate { get; set; }
+
+                private Status _status = Status.Active;
+                public Status Status { get => _status; set => _status = value; }   
+            }
+
+3. Infrastructure klasörü açýlýr.
+    3.1. Infrastructure => Context klasörü açýlýr.
+        3.1.1. Infrastructure => Context => ApplicationDbContext.cs açýlýr.
+
+            public class ApplicationDbContext : IdentityDbContext<AppUser>
+            {
+                public ApplicationDbContext(DbContextOptions<ApplicationDbContext> dbContextOptions) : base(dbContextOptions) { }
+            }
+
+4. Startup.cs içerisindeki ConfigureService() methoduna aþaðýdaki kod bloklarý eklenir.
+
+    services.AddDbContext<ApplicationDbContext>(options => 
+    {
+        options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+    });
+    
+    services.AddIdentity<AppUser, IdentityRole>(x =>
+    {
+        x.SignIn.RequireConfirmedPhoneNumber = false;
+        x.SignIn.RequireConfirmedAccount = false;
+        x.SignIn.RequireConfirmedEmail = false;
+        x.User.RequireUniqueEmail = true;
+        x.Password.RequiredLength = 1;
+        x.Password.RequiredUniqueChars = 0;
+        x.Password.RequireUppercase = false;
+        x.Password.RequireNonAlphanumeric = false;
+        x.Password.RequireLowercase = false;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+5. appsettings.json içerisine aþaðýdaki kod bloðunu ekleyin
+
+    "ConnectionStrings": {
+        "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=Sample_2Db;Trusted_Connection=True;MultipleActiveResultSets=True;"
+      }
+
+6. Migration yapýlýr.
+7. Controllers => AccountController açýlýr. Register, Login ve Profil Edit iþlemleri yerine getirilir.
+8. Controllers => RoleController açýlýr. Rol için CRUD operasyonu yapýlýr.
+    8.1. "Index" iþlemi için kullanýlacak View içerisinde "user-role" adýda custom bir tag helper oluþturulmuþtur.
+    8.2. Infrastructure => TagHelpers klasörü açýlýr.
+    8.3. Infrastructure => TagHelpers => RoleTagHelper.cs açýlýr.
+
+            [HtmlTargetElement("td", Attributes = "user-role")]
+            public class RoleTagHelper : TagHelper
+            {
+                private readonly UserManager<AppUser> _userManager;
+                private readonly RoleManager<IdentityRole> _roleManager;
+
+                public RoleTagHelper(UserManager<AppUser> userManager,
+                                     RoleManager<IdentityRole> roleManager)
+                {
+                    this._userManager = userManager;
+                    this._roleManager = roleManager;
+                }
+
+                [HtmlAttributeName("user-role")]
+                public string RoleId { get; set; }
+
+                public override async Task ProcessAsync(TagHelperContext context, TagHelperOutput output)
+                {
+                    List<string> names = new List<string>();
+
+                    IdentityRole role = await _roleManager.FindByIdAsync(RoleId);
+
+                    if (role != null)
+                    {
+                        foreach (AppUser user in _userManager.Users)
+                        {
+                            if (user != null && await _userManager.IsInRoleAsync(user, role.Name))
+                            {
+                                names.Add(user.UserName);
+                            }
+                        }
+                    }
+
+                    output.Content.SetContent(names.Count == 0 ? "No Users" : string.Join(',', names));
+                }
+            }
+
+    8.4. _ViewImports.cshtml içerisne aþaðýdaki kodu ekleyin
+
+        @addTagHelper Authentication_And_Authorization.Infrastructure.TagHelpers.*, Authentication_And_Authorization
+        
+
