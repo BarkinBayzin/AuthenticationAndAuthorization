@@ -72,9 +72,42 @@ namespace AuthenticationAndAuthorization.Controllers
         }
         #endregion
 
-        public IActionResult Index()
+        #region Edit Profile
+        public async Task<IActionResult> Edit()
         {
-            return View();
+            AppUser appUser = await _userManager.FindByNameAsync(User.Identity.Name);
+
+            UserUpdateDTO userUpdateDTO = new UserUpdateDTO(appUser);
+
+            return View(userUpdateDTO);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(UserUpdateDTO userUpdateDTO)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUser appUser = await _userManager.FindByEmailAsync(User.Identity.Name);
+
+                appUser.UserName = userUpdateDTO.UserName;
+
+                if (userUpdateDTO.Password != null)
+                {
+                    appUser.PasswordHash = _passwordHasher.HashPassword(appUser, userUpdateDTO.Password);
+                }
+
+                IdentityResult identityResult = await _userManager.UpdateAsync(appUser);
+
+                if (identityResult.Succeeded) TempData["Success"] = "Your profile has been edited..!";
+                else TempData["Error"] = "Your profile has not been edited..!";
+            }
+            return View(userUpdateDTO);
+        }
+        #endregion
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
         }
     }
 }

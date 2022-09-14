@@ -8,22 +8,46 @@
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
-    <header>
+     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AuthenticationAndAuthorization</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Authentication_And_Authorization</a>
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1 justify-content-end">
+                        @if (User?.Identity?.IsAuthenticated ?? false)
+                        {
+                            @if (User.IsInRole("admin") || User.IsInRole("manager"))
+                            {
+                                <li class="nav-item">
+                                    <a asp-controller="Role" asp-action="Index" class="btn btn-sm btn-primary">Role Page</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a asp-controller="AppUser" asp-action="Index" class="btn btn-sm btn-primary ml-2">User Page</a>
+                                </li>
+                            }
+
+                            <li class="nav-item">
+                                <a asp-controller="Account" asp-action="Edit" class="btn btn-sm btn-info ml-2">Edit Profile</a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-controller="Account" asp-action="LogOut" class="btn btn-sm btn-danger ml-2">@User.Identity.Name, Log Out</a>
+                            </li>
+
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="Account" asp-action="LogIn" class="btn btn-sm btn-primary">Sign In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a asp-controller="Account" asp-action="Register" class="btn btn-sm btn-primary ml-2">Sign Up</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

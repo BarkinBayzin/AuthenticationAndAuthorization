@@ -1,0 +1,28 @@
+﻿@model string
+@{
+    ViewData["Title"] = "Create";
+}
+
+<div class="row">
+    <div class="col-sm-8 offset-sm-2">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Create Role</h5>
+            </div>
+            <form asp-action="Create">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="Name" class="form-control" placeholder="Role Name" />
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="form-group">
+                        <input type="submit" value="Create Role" class="btn btn-outline-success btn-sm float-right" />
+                        <a asp-action="Index" class="btn btn-outline-info btn-sm float-left">Back To List</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -20,6 +20,8 @@ namespace AuthenticationAndAuthorization.Controllers
 
         public IActionResult Index()
         {
+            //var userRole = User.IsInRole("manager");
+            
             return View();
         }
 

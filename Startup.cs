@@ -46,8 +46,10 @@ namespace AuthenticationAndAuthorization
                 x.Password.RequireNonAlphanumeric = false;
                 x.Password.RequireLowercase = false;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
+             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+            //.AddRoles<IdentityRole>()
+           //.AddRoleManager<RoleManager<IdentityRole>>()
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -68,6 +70,7 @@ namespace AuthenticationAndAuthorization
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
