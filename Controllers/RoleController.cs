@@ -10,8 +10,7 @@ using System.Threading.Tasks;
 
 namespace AuthenticationAndAuthorization.Controllers
 {
-    [Authorize(Roles ="admin")]
-    [Authorize(Roles ="manager")]
+    [Authorize(Roles ="admin,manager")]
     public class RoleController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
